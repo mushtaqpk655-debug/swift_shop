@@ -1,0 +1,30 @@
+
+{
+  "project_info": {
+    "project_number": "577416790024",
+    "project_id": "swiftshop-6f171",
+    "storage_bucket": "swiftshop-6f171.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577416790024:android:2f1f837225b9ba478b91bd",
+        "android_client_info": {
+          "package_name": "com.mushtaq.swiftshop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi3z5iuFyyYd3TMTJi-8sqK5NThoW4qSQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
