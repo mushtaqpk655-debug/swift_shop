@@ -1,23 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignupPage extends StatefulWidget {
+  const SignupPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignupPage> createState() => _SignupPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _SignupPageState extends State<SignupPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> _login() async {
-    // 1. Basic Validation
-    if (_emailController.text.trim().isEmpty || _passwordController.text.trim().isEmpty) {
+  Future<void> _signUp() async {
+    // 1. Validation Logic
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter both email and password")),
+        const SnackBar(content: Text("Please fill in all fields")),
+      );
+      return;
+    }
+
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password must be at least 6 characters")),
       );
       return;
     }
@@ -25,38 +38,40 @@ class _LoginPageState extends State<LoginPage> {
     setState(() => _isLoading = true);
 
     try {
-      // 2. Attempt Login
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: _emailController.text.trim(),
-        password: _passwordController.text.trim(),
+      // 2. Create user in Firebase Auth
+      UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
       );
 
-      // 3. Strict Navigation
-      // Only navigate if the user object is not null and the widget is still in the tree
-      if (credential.user != null && mounted) {
-        // This clears the navigation stack so they can't go back to login
-        Navigator.pushReplacementNamed(context, '/home');
-      }
+      // 3. Create user document in Firestore
+      // We use .set() to ensure the role is strictly 'user' for every new signup
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .set({
+        'uid': userCredential.user!.uid,
+        'name': name,
+        'email': email,
+        'role': 'user', // Lowercase 'user' is critical for your security rules
+        'createdAt': FieldValue.serverTimestamp(),
+      });
 
+      if (mounted) {
+        // Use pushAndRemoveUntil to clear the signup screen from history
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
+      }
     } on FirebaseAuthException catch (e) {
-      // 4. Specific Firebase Error Handling
-      String message = "An error occurred";
-      if (e.code == 'user-not-found') {
-        message = "No account found with this email.";
-      } else if (e.code == 'wrong-password') {
-        message = "Incorrect password.";
-      } else if (e.code == 'invalid-email') {
-        message = "Please enter a valid email address.";
+      String message = e.message ?? "An error occurred";
+      if (e.code == 'email-already-in-use') {
+        message = "This email is already registered.";
       }
-
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: ${e.toString()}")),
-        );
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -67,6 +82,7 @@ class _LoginPageState extends State<LoginPage> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _nameController.dispose();
     super.dispose();
   }
 
@@ -75,7 +91,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView( // Added scroll view to prevent keyboard overflow
+        child: SingleChildScrollView( // Prevents bottom overflow on small screens
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
             child: Column(
@@ -83,14 +99,24 @@ class _LoginPageState extends State<LoginPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Welcome Back",
+                  "Create Account",
                   style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                 ),
                 const Text(
-                  "Sign in to continue shopping",
+                  "Join SwiftShop today",
                   style: TextStyle(color: Colors.grey, fontSize: 16),
                 ),
                 const SizedBox(height: 40),
+
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: "Full Name",
+                    prefixIcon: const Icon(Icons.person_outline),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+                const SizedBox(height: 15),
 
                 TextField(
                   controller: _emailController,
@@ -101,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 15),
 
                 TextField(
                   controller: _passwordController,
@@ -121,12 +147,11 @@ class _LoginPageState extends State<LoginPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.black,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
                     ),
-                    onPressed: _isLoading ? null : _login,
+                    onPressed: _isLoading ? null : _signUp,
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text("Login", style: TextStyle(color: Colors.white, fontSize: 18)),
+                        : const Text("Sign Up", style: TextStyle(color: Colors.white, fontSize: 18)),
                   ),
                 ),
 
@@ -134,11 +159,9 @@ class _LoginPageState extends State<LoginPage> {
 
                 Center(
                   child: TextButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/signup');
-                    },
+                    onPressed: () => Navigator.pop(context),
                     child: const Text(
-                      "Don't have an account? Sign Up",
+                      "Already have an account? Login",
                       style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                     ),
                   ),

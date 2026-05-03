@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:swift_shop/features/home/presentation/product_card.dart';
 import '../providers/product_provider.dart';
 import 'product_detail_page.dart';
 import 'my_orders_page.dart';
 import '../../../auth/presentation/pages/profile_page.dart';
-import '../../../cart/presentation/pages/cart_page.dart'; // Added CartPage import
+import '../../../cart/presentation/pages/cart_page.dart';
+import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../auth/presentation/providers/admin_provider.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -13,34 +16,38 @@ class HomePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final productsAsync = ref.watch(filteredProductsProvider);
+    final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       backgroundColor: Colors.grey[100],
       // --- 1. The Drawer (Side Menu) ---
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.black),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.white,
-                    child: Icon(Icons.person, color: Colors.black),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Swift Shop Menu',
-                    style: TextStyle(color: Colors.white, fontSize: 20),
-                  ),
-                ],
+            // Using UserAccountsDrawerHeader to fix overflow and look professional
+            UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(color: Colors.black),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                backgroundImage: user?.photoURL != null
+                    ? NetworkImage(user!.photoURL!)
+                    : null,
+                child: user?.photoURL == null
+                    ? const Icon(Icons.person, size: 40, color: Colors.black)
+                    : null,
+              ),
+              accountName: Text(
+                user?.displayName ?? 'SwiftShop User',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+              accountEmail: Text(
+                user?.email ?? 'No email available',
+                style: const TextStyle(color: Colors.white70),
               ),
             ),
+
             ListTile(
-              leading: const Icon(Icons.person_outline),
+              leading: const Icon(Icons.person_outline, color: Colors.black),
               title: const Text('Profile Settings'),
               onTap: () {
                 Navigator.pop(context);
@@ -51,7 +58,7 @@ class HomePage extends ConsumerWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.history),
+              leading: const Icon(Icons.history, color: Colors.black),
               title: const Text('My Orders'),
               onTap: () {
                 Navigator.pop(context);
@@ -61,15 +68,28 @@ class HomePage extends ConsumerWidget {
                 );
               },
             ),
-            const Divider(),
+
+            const Spacer(),
+            const Divider(height: 1),
+
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Logout', style: TextStyle(color: Colors.red)),
-              onTap: () {
+              title: const Text(
+                  'Logout',
+                  style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)
+              ),
+              onTap: () async {
                 Navigator.pop(context);
-                // Your logout logic
+                await FirebaseAuth.instance.signOut();
+                ref.invalidate(isAdminProvider);
+                await ref.read(authProvider.notifier).logout();
+
+                if (context.mounted) {
+                  Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+                }
               },
             ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -78,7 +98,7 @@ class HomePage extends ConsumerWidget {
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: Colors.black), // Menu icon color
+        iconTheme: const IconThemeData(color: Colors.black),
         title: const Text(
           "SWIFT SHOP",
           style: TextStyle(
@@ -91,7 +111,6 @@ class HomePage extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.shopping_cart_outlined),
             onPressed: () {
-              // Direct navigation fix for the cart icon
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const CartPage()),
@@ -133,7 +152,7 @@ class HomePage extends ConsumerWidget {
                   );
                 }
                 return GridView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: 0.72,
@@ -158,7 +177,7 @@ class HomePage extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator(color: Colors.black)),
-              error: (err, stack) => Center(child: Text("Error loading products")),
+              error: (err, stack) => const Center(child: Text("Error loading products")),
             ),
           ),
         ],
