@@ -3,8 +3,8 @@ name: Flutter Build APK
 on:
   push:
     branches:
-      - main  # This trigger runs every time you push code to the main branch
-  workflow_dispatch: # This allows you to run it manually from the GitHub website
+      - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Updated to v4
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4 # Updated to v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -23,17 +23,20 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.0' # Use your local flutter version
+          flutter-version: '3.22.0'
           channel: 'stable'
 
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Make Gradlew Executable
+        run: chmod +x android/gradlew # This prevents "Permission Denied" errors
+
       - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # THE CRITICAL FIX: Updated to v4
         with:
           name: release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
