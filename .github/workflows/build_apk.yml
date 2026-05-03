@@ -2,8 +2,7 @@ name: Flutter Build APK
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -24,20 +23,19 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # Removing the specific version line helps it stay flexible
 
       - name: Get dependencies
+        # This tells GitHub to look inside your app folder
         run: flutter pub get
-
-      - name: Make Gradlew Executable
-        run: chmod +x android/gradlew
+        working-directory: swift_shop
 
       - name: Build APK
-        # Added --no-pub to prevent it from trying to resolve versions again
-        run: flutter build apk --release --no-tree-shake-icons --no-pub
+        # Added --no-shrink here too as a double safety measure
+        run: flutter build apk --release --no-tree-shake-icons --no-shrink
+        working-directory: swift_shop
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: "**/build/app/outputs/flutter-apk/app-release.apk"

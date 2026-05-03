@@ -34,11 +34,19 @@ android {
         multiDexEnabled = true
     }
 
-    buildTypes {
-        release {
-            signingConfig = signingConfigs.getByName("debug")
-            // Add shrinking/obfuscation here later for production
-        }
+    buildTypes {getByName("release") {
+        // Use the debug signing config for now so the build doesn't fail
+        signingConfig = signingConfigs.getByName("debug")
+
+        // Set this to false to stop the Stripe R8 errors immediately
+        isMinifyEnabled = false
+        isShrinkResources = false
+
+        proguardFiles(
+            getDefaultProguardFile("proguard-android-optimize.txt"),
+            "proguard-rules.pro"
+        )
+    }
     }
 }
 
@@ -49,5 +57,5 @@ flutter {
 dependencies {
     // Basic multidex support for older Android versions
     implementation("androidx.multidex:multidex:2.0.1")
-    implementation("com.google.android.material:material:1.11.0")
+    implementation("com.google.android.material:material:1.13.0")
 }
