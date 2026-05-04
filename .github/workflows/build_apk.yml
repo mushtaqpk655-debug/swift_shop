@@ -31,11 +31,11 @@ jobs:
           flutter pub get
 
       - name: Build APK
-        # This finds the folder with the android directory and builds from there
+        # FIXED: Added space before --dart-define
         run: |
           PROJECT_DIR=$(find . -name android -exec dirname {} \;)
           cd $PROJECT_DIR
-          flutter build apk --release --no-tree-shake-icons --no-shrink--dart-define=STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+          flutter build apk --release --no-tree-shake-icons --no-shrink --dart-define=STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
