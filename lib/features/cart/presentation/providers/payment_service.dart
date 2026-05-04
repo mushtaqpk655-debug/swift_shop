@@ -4,8 +4,13 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class PaymentService {
-  // Your Secret Key
-  static const String _secretKey = "YOUR_STRIPE_SECRET_KEY";
+  // --- UPDATED FOR SECURITY ---
+  // This looks for 'STRIPE_SECRET_KEY' during the build process.
+  // If not found (like when running locally), it uses your fallback test key.
+  static const String _secretKey = String.fromEnvironment(
+    'STRIPE_SECRET_KEY',
+    defaultValue: '',
+  );
 
   static Future<Map<String, dynamic>> createPaymentIntent(String amount, String currency) async {
     try {
@@ -18,7 +23,7 @@ class PaymentService {
       var response = await http.post(
         Uri.parse('https://api.stripe.com/v1/payment_intents'),
         headers: {
-          'Authorization': 'Bearer $_secretKey',
+          'Authorization': 'Bearer $_secretKey', // This uses the injected secret
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: body,
@@ -37,7 +42,6 @@ class PaymentService {
   static Future<void> makePayment(String amountInAED) async {
     try {
       // 1. Convert AED to Fils (Multiply by 100)
-      // Example: 100.50 AED becomes 10050
       int amountCalculated = (double.parse(amountInAED) * 100).toInt();
 
       // 2. Create Payment Intent
@@ -52,9 +56,6 @@ class PaymentService {
           paymentIntentClientSecret: paymentIntent['client_secret'],
           merchantDisplayName: 'Swift Shop UAE',
           style: ThemeMode.light,
-          // Optional: Enable Apple Pay/Google Pay
-          applePay: null, //const PaymentSheetApplePay(merchantCountryCode: 'AE'),
-          googlePay: null,//const PaymentSheetGooglePay(merchantCountryCode: 'AE', testEnv: true),
         ),
       );
 

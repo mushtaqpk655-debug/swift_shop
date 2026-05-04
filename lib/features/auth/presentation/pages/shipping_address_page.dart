@@ -20,7 +20,7 @@ class _ShippingAddressPageState extends State<ShippingAddressPage> {
         child: Column(
           children: [
             DropdownButtonFormField<String>(
-              value: selectedCity,
+              initialValue: selectedCity,
               decoration: const InputDecoration(labelText: "City"),
               items: ['Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'UAQ', 'RAK', 'Fujairah']
                   .map((city) => DropdownMenuItem(value: city, child: Text(city)))

@@ -25,17 +25,20 @@ jobs:
           channel: 'stable'
 
       - name: Get dependencies
-        # This tells GitHub to look inside your app folder
-        run: flutter pub get
-        working-directory: swift_shop
+        # We use 'find' to run pub get wherever the pubspec.yaml is
+        run: |
+          cd $(find . -name pubspec.yaml -exec dirname {} \;)
+          flutter pub get
 
       - name: Build APK
-        # Added --no-shrink here too as a double safety measure
-        run: flutter build apk --release --no-tree-shake-icons --no-shrink
-        working-directory: swift_shop
+        # This finds the folder with the android directory and builds from there
+        run: |
+          PROJECT_DIR=$(find . -name android -exec dirname {} \;)
+          cd $PROJECT_DIR
+          flutter build apk --release --no-tree-shake-icons --no-shrink--dart-define=STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: release-apk
-          path: "**/build/app/outputs/flutter-apk/app-release.apk"
+          path: "**/*.apk"

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../injection_container.dart';
@@ -43,7 +44,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       await FirebaseAuth.instance.signOut(); // This tells Firebase to clear the session
       //state = null; // Or whatever your 'Logged Out' state is
     } catch (e) {
-      print("Logout Error: $e");
+      debugPrint("Logout Error: $e");
     }
   }
 }

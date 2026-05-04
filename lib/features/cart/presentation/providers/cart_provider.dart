@@ -36,7 +36,7 @@ class CartNotifier extends StateNotifier<List<ProductEntity>> {
     final firestore = FirebaseFirestore.instance;
 
     // Calculate total price in AED
-    double total = state.fold(0, (sum, item) => sum + item.price);
+    double total = state.fold(0, (totalSum, item) => totalSum + item.price);
 
     // Map cart items for Firestore
     List<Map<String, dynamic>> orderItems = state.map((item) => {

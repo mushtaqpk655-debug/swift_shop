@@ -117,7 +117,7 @@ class AdminPanelPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             // This adds the colored vertical line on the left
             border: Border(left: BorderSide(color: color, width: 5)),
-            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 5)],
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 5)],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

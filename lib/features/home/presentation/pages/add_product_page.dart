@@ -35,9 +35,11 @@ class _AddProductPageState extends State<AddProductPage> {
           );
         }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: $e")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error: $e")),
+          );
+        }
       }
       setState(() => _isLoading = false);
     }
