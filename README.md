@@ -41,14 +41,26 @@ This project utilizes **GitHub Actions** to automate the build process. Every ti
 > **Status:** The project currently maintains a 100% build success rate on Linux runners.
 
 ---
+## 📸 App Screenshots
 
-## 📸 Screenshots
+<!-- Row 1: Authentication -->
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/7b86cf32-43d8-4acf-8ed2-4200c0aa6c36" width="30%" alt="Login Screen" />
+  <img src="https://github.com/user-attachments/assets/4085ad21-5c5a-45d0-9b5e-04f0910f77b6" width="30%" alt="Sign Up Screen" />
+</p>
 
-| Splash Screen | Home Page | Checkout |
-| :---: | :---: | :---: |
-| ![Splash](https://via.placeholder.com/200x400?text=Splash+Screen) | ![Home](https://via.placeholder.com/200x400?text=Home+UI) | ![Checkout](https://via.placeholder.com/200x400?text=Stripe+Payment) |
+<!-- Row 2: Shopping Experience -->
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/472a73b4-d90a-45a4-b048-3c03b8d6b7d9" width="30%" alt="Home Screen" />
+  <img src="https://github.com/user-attachments/assets/05e89bbb-f9d1-4838-8d35-d1248bc762fd" width="30%" alt="My Cart" />
+  <img src="https://github.com/user-attachments/assets/ae6a36af-41c2-4d2d-b794-22e077bf5293" width="30%" alt="Stripe Payment" />
+</p>
 
-*(Tip: Replace these placeholder links with actual screenshots from your app later!)*
+<!-- Row 3: Account & Admin -->
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d898503c-3568-4239-a81c-4b51abf989aa" width="30%" alt="Admin Dashboard" />
+  <img src="https://github.com/user-attachments/assets/39e05058-c2b5-4fcf-9d43-e245ac763cf9" width="30%" alt="Logout Drawer" />
+</p>
 
 ---
 
